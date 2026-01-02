@@ -1,0 +1,47 @@
+. The Standard Login (Without Password)
+On many modern Ubuntu systems, the root MySQL user is configured to authenticate via the system's root user. This means you can log in directly without a MySQL password as long as you use sudo:
+
+Bash
+
+sudo mysql
+Once you run this, your prompt should change to mysql>, indicating you are inside the database console.
+
+2. Login with a Password
+If you set a root password during the mysql_secure_installation process, use this command:
+
+Bash
+
+sudo mysql -u root -p
+-u root: Specifies the user as "root".
+
+-p: Tells MySQL to prompt you for the password. Enter the password you created when asked.
+
+3. Creating the Table (Step-by-Step)
+Once you see the mysql> prompt, copy and paste these commands one by one:
+
+A. Create and Select the Database:
+
+SQL
+
+CREATE DATABASE ec2_demo;
+USE ec2_demo;
+B. Create the Table: Paste the entire block below and press Enter:
+
+SQL
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+C. Verify your work: Run this to see your new table structure:
+
+SQL
+
+DESCRIBE users;
+D. Exit the console: When you are finished, type:
+
+SQL
+
+EXIT;

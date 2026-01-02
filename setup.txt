@@ -1,0 +1,57 @@
+1. Update the System
+Connect to your instance via SSH and ensure all existing packages are current.
+
+Bash
+
+sudo apt update && sudo apt upgrade -y
+2. Install Apache Web Server
+Install the web server and enable it to start automatically when the server boots.
+
+Bash
+
+sudo apt install apache2 -y
+sudo systemctl start apache2
+sudo systemctl enable apache2
+Verify: Visit http://your-ec2-public-ip in your browser. You should see the "Apache2 Ubuntu Default Page."
+
+3. Install MySQL Database
+Ubuntu 24.04 (and 2026 systems) uses the latest stable MySQL package.
+
+Bash
+
+sudo apt install mysql-server -y
+After installation, run the security script to set a root password and remove insecure defaults:
+
+Bash
+
+sudo mysql_secure_installation
+Note: In 2026, many Ubuntu versions use auth_socket by default, so you may not need a password for sudo mysql locally.
+
+4. Install PHP
+To run dynamic scripts, you need PHP and its module to talk to the database.
+
+Bash
+
+sudo apt install php libapache2-mod-php php-mysql -y
+Check your version with: php -v.
+
+5. Configure Permissions (Crucial)
+To allow your ubuntu user to edit files in the web root without using sudo every time:
+
+Bash
+
+# Add yourself to the web group
+sudo usermod -a -G www-data ubuntu
+
+# Change ownership of the web directory
+sudo chown -R ubuntu:www-data /var/www/html
+sudo chmod -R 775 /var/www/html
+Logout and log back in for the group changes to take effect.
+
+6. Final Test
+Create a test file to confirm PHP and Apache are working together:
+
+Bash
+
+echo "<?php phpinfo(); ?>" > /var/www/html/info.php
+Visit http://your-ec2-public-ip/info.php. You should see a detailed page about your PHP configuration.
