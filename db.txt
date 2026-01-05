@@ -1,0 +1,46 @@
+1. Create the Database Table
+
+Log back into MySQL to create a table for your data.
+Bash
+
+sudo mysql -u root
+
+-- Create the database
+CREATE DATABASE IF NOT EXISTS my_app_db;
+
+-- Verify it exists (you should see 'my_app_db' in the list)
+SHOW DATABASES;
+
+-- Switch to the database
+USE my_app_db;
+
+-- Re-create the table just in case
+CREATE TABLE IF NOT EXISTS guestbook (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    message TEXT NOT NULL,
+    reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Ensure your user has permissions for THIS specific database
+-- 1. Remove the user if they exist
+DROP USER IF EXISTS 'app_user'@'localhost';
+
+-- 2. Create the user manually first
+CREATE USER 'app_user'@'localhost' IDENTIFIED BY 'your_strong_password';
+
+-- 3. Now grant the privileges to the specific database
+GRANT ALL PRIVILEGES ON my_app_db.* TO 'app_user'@'localhost';
+
+-- 4. Reload the privilege tables
+FLUSH PRIVILEGES;
+
+EXIT;
+
+2. Verify the User Permissions
+
+To make sure it worked, run this command in the MySQL shell:
+SQL
+SHOW GRANTS FOR 'app_user'@'localhost';
+
+You should see a line that looks like: GRANT ALL PRIVILEGES ON "my_app_db".* TO "app_user"@"localhost"

@@ -1,0 +1,45 @@
+1. Update the System
+
+Always start by ensuring your package list is current.
+Bash
+sudo apt update && sudo apt upgrade -y
+
+2. Install Apache (The Web Server)
+
+Install Apache and enable it to start on boot.
+sudo apt install apache2 -y
+sudo systemctl start apache2
+sudo systemctl enable apache2
+
+Verify: Open your browser and type in your EC2's Public IP. You should see the "Apache2 Ubuntu Default Page."
+
+3. Install MySQL (The Database)
+
+Install the database server and run the security script to set a root password and remove insecure defaults.
+sudo apt install mysql-server -y
+
+4. Install PHP (The Processor)
+
+Install PHP along with the modules that allow it to talk to Apache and MySQL.
+sudo apt install php libapache2-mod-php php-mysql -y
+
+To check the version installed, run php -v.
+
+5. Testing & Permissions
+
+<?php
+phpinfo();
+?>
+
+Create a small test file in the web root to confirm Apache can handle PHP.
+
+Verify: Visit http://your-public-ip/info.php. You should see a page detailing your PHP configuration.
+Security Tip: Delete this file once you're done testing, as it reveals sensitive server info: sudo rm /var/www/html/info.php.
+
+6. Set Directory Permissions
+
+By default, the /var/www/html folder is owned by root. To allow your ubuntu user to upload files easily:
+Bash
+
+sudo chown -R ubuntu:www-data /var/www/html
+sudo chmod -R 775 /var/www/html

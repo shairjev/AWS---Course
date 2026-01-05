@@ -1,0 +1,107 @@
+<?php
+$conn = new mysqli("localhost", "app_user", "App_User_2026!#", "my_app_db");
+
+// 1. DELETE Operation
+if (isset($_GET['delete'])) {
+    $id = $_GET['delete'];
+    $stmt = $conn->prepare("DELETE FROM students WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    header("Location: index.php");
+}
+
+// 2. CREATE / UPDATE Operation
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $roll = $_POST['roll_no'];
+    $name = $_POST['name'];
+    $m = $_POST['maths'];
+    $s = $_POST['science'];
+    $e = $_POST['english'];
+
+    if (isset($_POST['update_id']) && !empty($_POST['update_id'])) {
+        // UPDATE
+        $stmt = $conn->prepare("UPDATE students SET roll_no=?, name=?, maths=?, science=?, english=? WHERE id=?");
+        $stmt->bind_param("ssiiii", $roll, $name, $m, $s, $e, $_POST['update_id']);
+    } else {
+        // CREATE
+        $stmt = $conn->prepare("INSERT INTO students (roll_no, name, maths, science, english) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssiii", $roll, $name, $m, $s, $e);
+    }
+    $stmt->execute();
+    header("Location: index.php");
+}
+
+// Pull data for Edit mode
+$edit_data = null;
+if (isset($_GET['edit'])) {
+    $res = $conn->query("SELECT * FROM students WHERE id=" . $_GET['edit']);
+    $edit_data = $res->fetch_assoc();
+}
+
+// Fetch all students
+$students = $conn->query("SELECT *, (maths + science + english) as total FROM students ORDER BY roll_no ASC");
+?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Marksheet System</title>
+    <style>
+        body { font-family: sans-serif; margin: 30px; background: #f4f4f4; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+        th { background: #007bff; color: white; }
+        .btn { padding: 5px 10px; text-decoration: none; border-radius: 3px; color: white; font-size: 12px; }
+        .btn-del { background: #dc3545; }
+        .btn-edit { background: #ffc107; color: black; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2><?php echo $edit_data ? 'Edit Student' : 'Add New Student'; ?></h2>
+        <form method="post">
+            <input type="hidden" name="update_id" value="<?php echo $edit_data['id'] ?? ''; ?>">
+            <input type="text" name="roll_no" placeholder="Roll No" required value="<?php echo $edit_data['roll_no'] ?? ''; ?>">
+            <input type="text" name="name" placeholder="Student Name" required value="<?php echo $edit_data['name'] ?? ''; ?>">
+            <input type="number" name="maths" placeholder="Maths" required value="<?php echo $edit_data['maths'] ?? ''; ?>">
+            <input type="number" name="science" placeholder="Science" required value="<?php echo $edit_data['science'] ?? ''; ?>">
+            <input type="number" name="english" placeholder="English" required value="<?php echo $edit_data['english'] ?? ''; ?>">
+            <button type="submit" style="background:#28a745; color:white; border:none; padding:10px;">Save Record</button>
+            <?php if($edit_data): ?> <a href="index.php">Cancel</a> <?php endif; ?>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Marksheet Records</h2>
+        <table>
+            <tr>
+                <th>Roll No</th>
+                <th>Name</th>
+                <th>Maths</th>
+                <th>Science</th>
+                <th>English</th>
+                <th>Total</th>
+                <th>Actions</th>
+            </tr>
+            <?php while($row = $students->fetch_assoc()): ?>
+            <tr>
+                <td><?php echo $row['roll_no']; ?></td>
+                <td><?php echo $row['name']; ?></td>
+                <td><?php echo $row['maths']; ?></td>
+                <td><?php echo $row['science']; ?></td>
+                <td><?php echo $row['english']; ?></td>
+                <td><strong><?php echo $row['total']; ?></strong></td>
+                <td>
+                    <a href="?edit=<?php echo $row['id']; ?>" class="btn btn-edit">Edit</a>
+                    <a href="?delete=<?php echo $row['id']; ?>" class="btn btn-del" onclick="return confirm('Delete this record?')">Delete</a>
+                </td>
+            </tr>
+            <?php endwhile; ?>
+        </table>
+    </div>
+
+</body>
+</html>
